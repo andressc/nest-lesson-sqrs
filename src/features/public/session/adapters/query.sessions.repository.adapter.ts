@@ -1,5 +1,5 @@
-import { SessionModel } from '../entity/session.schema';
+import { ResponseSessionDto } from '../dto/response-session.dto';
 
 export abstract class QuerySessionsRepositoryAdapter {
-	abstract findAllSessionsByUserId(currentUserId: string): Promise<SessionModel[]>;
+	abstract findAllSessionsByUserId(currentUserId: string): Promise<ResponseSessionDto[]>;
 }

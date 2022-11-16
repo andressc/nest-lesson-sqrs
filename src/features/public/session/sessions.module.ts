@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { SessionsController } from './api/sessions.controller';
 import { SessionsRepository } from './infrastructure/repository/sessions.repository';
-import { QuerySessionsRepository } from './infrastructure/query/query-sessions.repository';
+import { QuerySessionsRepository } from './api/query/query-sessions.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Session, SessionSchema } from './entity/session.schema';
-import { FindAllSessionHandler } from './application/queries/find-all-session.handler';
 import { RemoveAllUserSessionHandler } from './application/commands/remove-all-user-session.handler';
 import { RemoveUserSessionHandler } from './application/commands/remove-user-session.handler';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -12,7 +11,6 @@ import { SessionsRepositoryAdapter } from './adapters/sessions.repository.adapte
 import { QuerySessionsRepositoryAdapter } from './adapters/query.sessions.repository.adapter';
 
 export const CommandHandlers = [RemoveAllUserSessionHandler, RemoveUserSessionHandler];
-export const QueryHandlers = [FindAllSessionHandler];
 export const Repositories = [
 	{
 		provide: QuerySessionsRepositoryAdapter,
@@ -37,8 +35,12 @@ export const Services = [];
 	],
 
 	controllers: [SessionsController],
-	providers: [...Services, ...Repositories, ...CommandHandlers, ...QueryHandlers],
+	providers: [...Services, ...Repositories, ...CommandHandlers],
 	exports: [
+		{
+			provide: QuerySessionsRepositoryAdapter,
+			useClass: QuerySessionsRepository,
+		},
 		{
 			provide: SessionsRepositoryAdapter,
 			useClass: SessionsRepository,

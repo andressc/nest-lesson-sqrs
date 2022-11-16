@@ -25,9 +25,8 @@ import {
 } from '../../../../common/guards';
 import { PasswordRecoveryTokenGuard } from '../../../../common/guards';
 import { AuthConfig } from '../../../../configuration';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CommandBus } from '@nestjs/cqrs';
 import { RemoveUserSessionCommand } from '../../session/application/commands/remove-user-session.handler';
-import { FindMeUserCommand } from '../../../admin/users/application/queries/find-me-user.handler';
 import { LoginAuthCommand } from '../application/commands/login-auth.handler';
 import { RefreshTokenAuthCommand } from '../application/commands/refresh-token-auth.handler';
 import { RegistrationAuthCommand } from '../application/commands/registration-auth.handler';
@@ -35,14 +34,15 @@ import { RegistrationConfirmationAuthCommand } from '../application/commands/reg
 import { RegistrationEmailResendingAuthCommand } from '../application/commands/registration-email-resending-auth.handler';
 import { PasswordRecoveryAuthCommand } from '../application/commands/password-recovery-auth.handler';
 import { NewPasswordAuthCommand } from '../application/commands/new-password-auth.handler';
+import { QueryUsersRepositoryAdapter } from '../../../admin/users/adapters/query.users.repository.adapter';
 
 @Controller('auth')
 export class AuthController {
 	constructor(
 		private readonly authService: AuthService,
 		private readonly authConfig: AuthConfig,
+		private readonly queryUsersRepository: QueryUsersRepositoryAdapter,
 		private readonly commandBus: CommandBus,
-		private readonly queryBus: QueryBus,
 	) {}
 
 	@HttpCode(200)
@@ -69,7 +69,7 @@ export class AuthController {
 	@UseGuards(AccessTokenGuard)
 	@Get('me')
 	async getProfile(@CurrentUserId() currentUserId: string) {
-		return this.queryBus.execute(new FindMeUserCommand(currentUserId));
+		return await this.queryUsersRepository.findMe(currentUserId);
 	}
 
 	@HttpCode(200)
